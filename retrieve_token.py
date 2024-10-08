@@ -9,20 +9,20 @@ endpoint_URL = '/token'
 CREDENTIALS_FILE = 'credentials.json'
 TOKEN_FILE = 'token.txt'
 
-def load_credentials():
+def load_credentials(api_no = 0):
     if os.path.exists(CREDENTIALS_FILE):
         with open(CREDENTIALS_FILE, 'r') as json_file:
             credentials = json.load(json_file)
-            USERNAME = credentials['username']
-            PASSWORD = credentials['password']
-            KEY = credentials['key']
+            USERNAME = credentials['username'][api_no]
+            PASSWORD = credentials['password'][api_no]
+            KEY = credentials['key'][api_no]
             json_file.close()
     else:
         print("Need to set credentials by creating credentials.json")
     return USERNAME, PASSWORD, KEY
 
-def request_token(refresh_token = None):
-    USERNAME, PASSWORD, KEY = load_credentials()
+def request_token(refresh_token = None, api_no = 0):
+    USERNAME, PASSWORD, KEY = load_credentials(api_no)
 
     TOKEN_ENDPOINT = base_URL + category_URL + AUTHENTICATION + endpoint_URL
     if refresh_token is None:
@@ -74,18 +74,18 @@ def load_token():
         pass
     return token
 
-def get_token():
+def get_token(api_no = 0):
     token = load_token()
     if token is not None:
         if token['expiry_tm'] > time.time():
             return token['access_token']
-        token = request_token(token['refresh_token'])
+        token = request_token(refresh_token = token['refresh_token'], api_no = api_no)
         if token is None:
-            token = request_token()
+            token = request_token(api_no = api_no)
     else:
-        token = request_token()
+        token = request_token(api_no = api_no)
     save_token(token)
     return token['access_token']
 
 if __name__ == "__main__":    
-    access_token = get_token()
+    access_token = get_token(api_no = 1)
